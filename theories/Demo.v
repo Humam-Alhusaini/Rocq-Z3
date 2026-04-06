@@ -5,6 +5,8 @@ From Rocq_Z3 Require Import Loader.
 Ltac2 Eval question 2. (* false *)
 Ltac2 Eval question 42. (* true *)
 
+Ltac2 Eval smt "z3".
+
 (* try out our "tuto_exact" primitive *)
 Goal True.
   Fail tuto_exact '0.

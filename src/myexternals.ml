@@ -43,6 +43,11 @@ let define s = define (pname s)
 let () = define "the_question" (int @-> ret bool) @@ fun i ->
   Int.equal i 42
 
+let () = define "smt" (string @-> ret unit) @@ fun name ->
+  let chan = name ^ ".smt2" |> open_out  in 
+    let _ = Printf.fprintf chan "67" in
+      flush chan;; 
+
 (* Now, we define a wrapper around "exact", it takes a constr
    (ie a term) and returns the trivial value (and does side effects on the goal).
    "tac" means we have access to the tactic monad. *)

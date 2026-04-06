@@ -11,6 +11,10 @@ Ltac2 @external question : int -> bool
 Ltac2 @external tuto_exact : constr -> unit
   := "rocq_z3.rocq_z3" "my_exact".
 
+(** a wrapper around "test" *)
+Ltac2 @external smt : string -> unit
+  := "rocq_z3.rocq_z3" "smt".
+
 (** Some custom type. *)
 Ltac2 Type custom := [ A | B (constr) ].
 

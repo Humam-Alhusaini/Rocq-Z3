@@ -13,6 +13,7 @@
 *.vok
 *.vos
 *.glob
+.*.aux
 
 *.rocq
 *.rocq.conf
