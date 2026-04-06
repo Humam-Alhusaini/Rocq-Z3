@@ -20,7 +20,7 @@ let return = Proofview.tclUNIT
 
 (* Used to distinguish our primitives from some other plugin's primitives.
    By convention matches the plugin's ocamlfind name. *)
-let plugin_name = "rocq-plugin-tutorial.tuto4"
+let plugin_name = "rocq-plugin-tutorial.rocq_z3"
 
 let pname s = { Tac2expr.mltac_plugin = plugin_name; mltac_tactic = s }
 
@@ -165,8 +165,8 @@ let () = define "sum2" (custom2 @-> ret int) @@ fun (i,j) ->
    The type is identified by its nma of type [Tac2expr.type_constant = KerName.t].
    Current APIs for this are not very nice, we have to write module paths by hand. *)
 
-(* the loader module is a file whose logical name is Tuto4.Loader *)
-let loader_module_name = ModPath.MPfile (DirPath.make @@ List.map Id.of_string ["Loader"; "Tuto4"])
+(* the loader module is a file whose logical name is Rocq_Z3.Loader *)
+let loader_module_name = ModPath.MPfile (DirPath.make @@ List.map Id.of_string ["Loader"; "Rocq_Z3"])
 
 (* the type in that module is "custom2" *)
 let custom2_type_name = KerName.make loader_module_name (Label.make "custom2")

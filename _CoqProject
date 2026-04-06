@@ -1,5 +1,5 @@
 src/META.rocq-plugin-tutorial
--R theories Tuto4
+-R theories Rocq_Z3
 -I src
 
 theories/Loader.v

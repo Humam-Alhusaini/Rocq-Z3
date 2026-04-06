@@ -1,7 +1,7 @@
-package "tuto4" (
+package "rocq_z3" (
     directory = "."
     version = "dev"
-    description = "A tuto4 plugin"
+    description = "A Z3 plugin"
     requires = "rocq-runtime.plugins.ltac2"
     archive(byte) = "tuto4_plugin.cma"
     archive(native) = "tuto4_plugin.cmxa"
