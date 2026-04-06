@@ -20,7 +20,7 @@ let return = Proofview.tclUNIT
 
 (* Used to distinguish our primitives from some other plugin's primitives.
    By convention matches the plugin's ocamlfind name. *)
-let plugin_name = "rocq-plugin-tutorial.rocq_z3"
+let plugin_name = "rocq_z3.rocq_z3"
 
 let pname s = { Tac2expr.mltac_plugin = plugin_name; mltac_tactic = s }
 

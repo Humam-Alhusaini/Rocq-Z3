@@ -1,0 +1,11 @@
+package "rocq_z3" (
+    directory = "."
+    version = "dev"
+    description = "A Z3 plugin"
+    requires = "rocq-runtime.plugins.ltac2"
+    archive(byte) = "rocq_z3.cma"
+    archive(native) = "rocq_z3.cmxa"
+    plugin(byte) = "rocq_z3.cma"
+    plugin(native) = "rocq_z3.cmxs"
+)
+directory = "."

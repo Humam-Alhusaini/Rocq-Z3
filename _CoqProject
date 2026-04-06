@@ -1,4 +1,4 @@
-src/META.rocq-plugin-tutorial
+src/META.rocq_z3
 -R theories Rocq_Z3
 -I src
 
@@ -7,4 +7,4 @@ theories/Demo.v
 
 src/myexternals.ml
 src/myexternals.mli
-src/tuto4_plugin.mlpack
+src/rocq_z3.mlpack
