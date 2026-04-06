@@ -5,6 +5,5 @@ src/META.rocq_z3
 theories/Loader.v
 theories/Demo.v
 
-src/myexternals.ml
-src/myexternals.mli
+src/interface.ml
 src/rocq_z3.mlpack
