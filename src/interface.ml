@@ -8,13 +8,6 @@ open Tac2externals
 (* Translation operators between Ltac2 values and OCaml values in various types *)
 open Tac2ffi
 
-(** **** Two simple examples of tactics *)
-
-(* Rocq tactics are values of the [Proofview.tactic] monad.
-   tclUnit in Proofview is the return operation of this monad.
-   We define an alias for convenience. *)
-let return = Proofview.tclUNIT
-
 (* Used to distinguish our primitives from some other plugin's primitives.
    By convention matches the plugin's ocamlfind name. *)
 let plugin_name = "rocq_z3.rocq_z3"

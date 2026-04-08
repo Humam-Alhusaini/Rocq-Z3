@@ -1,3 +1,4 @@
 (library
- (name hi)
- (libraries rocq-runtime.plugins.ltac2))
+ (name rocq-z3)
+ (libraries rocq-runtime.plugins.ltac2)
+ )
