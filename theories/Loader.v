@@ -6,13 +6,9 @@ Declare ML Module "rocq_z3.rocq_z3".
 Ltac2 @external smt : string -> unit
   := "rocq_z3.rocq_z3" "smt".
 
-(** a wrapper around "smt" *)
+(** a wrapper around "print_goal" *)
 Ltac2 @external print_goal : unit -> string
   := "rocq_z3.rocq_z3" "print_goal".
-
-(** a wrapper around "smt" *)
-Ltac2 @external rand_string : unit -> string
-  := "rocq_z3.rocq_z3" "rand_string".
 
 
 

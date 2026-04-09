@@ -40,10 +40,7 @@ let get_goal_string () : string Proofview.tactic =
     return s
   );;
 
-let rand_string () = "hello";;
-
 let () = 
   define "smt" (string @-> ret unit) @@ smt;
-  define "print_goal" (unit @-> tac string) @@ get_goal_string;
-  define "rand_string" (unit @-> ret string) @@ rand_string;;
+  define "print_goal" (unit @-> tac string) @@ get_goal_string;;
 
