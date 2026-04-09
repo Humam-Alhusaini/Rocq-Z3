@@ -1,5 +1,5 @@
 clean-smt2:
-	rm *.smt2
+	rm -f *.smt2
 
 COQBIN?=
 
