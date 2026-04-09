@@ -1,3 +1,6 @@
+clean-smt2:
+	rm *.smt2
+
 COQBIN?=
 
 %: Makefile.rocq
