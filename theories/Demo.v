@@ -19,7 +19,7 @@ Proof.
   print_goal "conj".
 Admitted.
 
-Theorem disj : (forall x, x = 1) /\ (forall y, y = 2).
+Theorem disj : (forall x, x = 1) \/ (forall y, y = 2).
 Proof.
   print_goal "disj".
 Admitted.
