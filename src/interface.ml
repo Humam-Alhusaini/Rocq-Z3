@@ -28,7 +28,7 @@ let return = Proofview.tclUNIT
 
 
 let write_to_smt2 filename txt =
-  if Sys.file_exists filename then
+  if filename ^ ".smt2" |> Sys.file_exists then
     failwith (Printf.sprintf "File '%s' already exists" filename)
   else
   let chan = filename ^ ".smt2" |> open_out in 
