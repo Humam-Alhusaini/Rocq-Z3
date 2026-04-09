@@ -26,7 +26,7 @@ let define s = define (pname s)
    We define an alias for convenience. *)
 let return = Proofview.tclUNIT
 
-
+(*This file writes the goal to filename.smt2 *)
 let write_to_smt2 filename txt =
   if filename ^ ".smt2" |> Sys.file_exists then
     failwith (Printf.sprintf "File '%s' already exists" filename)
@@ -35,6 +35,7 @@ let write_to_smt2 filename txt =
     let _ = Printf.fprintf chan "%s\n" txt in
       flush chan;; 
 
+(*Boiler plate for making a tactic*)
 let mk_tactic (tac : (Environ.env -> Evd.evar_map -> Constr.t -> unit Proofview.tactic)) : unit Proofview.tactic =
   (*Applies the goal-dependent tactic t in each goal independently*)
   Proofview.Goal.enter (fun gl ->
@@ -42,17 +43,25 @@ let mk_tactic (tac : (Environ.env -> Evd.evar_map -> Constr.t -> unit Proofview.
     let _ = Proofview.Goal.hyps gl in
     (*Gets hypothesis and global environment*)
     let env = Proofview.Goal.env gl in
-    (*Gets current evar map, which is necessary to turn econstr into const*)
+    (*Gets current evar map*)
     let evars = Proofview.Goal.sigma gl in
     (*Gets conclusion of goal (EConstr) and turns it into Constr*)
     let constr = Proofview.Goal.concl gl |> EConstr.to_constr evars in 
     tac env evars constr
   );;
 
+let format_goal (typ_str : string) (constr_str : string) (env_str : string) =
+  Printf.sprintf "Type:\n\n %s\n\nConstr:\n\n %s\n\nEnv: %s\n" typ_str constr_str env_str;;
+
 let write_goal (filename : string) (env : Environ.env) (evars : Evd.evar_map) (constr : Constr.t) : unit Proofview.tactic =
   (*Constr -> Pp.t -> string*)
-  let _ = constr |> Printer.pr_constr_env env evars |> Pp.string_of_ppcmds |> write_to_smt2 filename in
-     Proofview.tclUNIT ();;
+  let constr_str = constr |> Printer.pr_constr_env env evars |> Pp.string_of_ppcmds in
+  (*Constr = Typs in constr module, which implies that this is the same or atleast similar*)
+  let typ_str = constr |> Printer.pr_type_env env evars |> Pp.string_of_ppcmds in 
+  (*Formats the env*)
+  let env_str = Printer.pr_context_unlimited env evars |> Pp.string_of_ppcmds in
+    let _ = format_goal typ_str constr_str env_str |> write_to_smt2 filename in
+      Proofview.tclUNIT ();;
 
 let print_goal filename = write_goal filename |> mk_tactic
 
