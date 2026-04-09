@@ -27,24 +27,34 @@ let define s = define (pname s)
 let return = Proofview.tclUNIT
 
 
-let write_to_smt2 name txt =
-  let chan = name ^ ".smt2" |> open_out in 
+let write_to_smt2 filename txt =
+  if Sys.file_exists filename then
+    failwith (Printf.sprintf "File '%s' already exists" filename)
+  else
+  let chan = filename ^ ".smt2" |> open_out in 
     let _ = Printf.fprintf chan "%s\n" txt in
       flush chan;; 
 
 let mk_tactic (tac : (Environ.env -> Evd.evar_map -> Constr.t -> unit Proofview.tactic)) : unit Proofview.tactic =
+  (*Applies the goal-dependent tactic t in each goal independently*)
   Proofview.Goal.enter (fun gl ->
+    (*Gets hypothesis*)
+    let _ = Proofview.Goal.hyps gl in
+    (*Gets hypothesis and global environment*)
     let env = Proofview.Goal.env gl in
+    (*Gets current evar map, which is necessary to turn econstr into const*)
     let evars = Proofview.Goal.sigma gl in
-    let constr = Proofview.Goal.concl gl |> EConstr.to_constr evars in (*to_constr checks for any mis mapping between evars and econstr*)
+    (*Gets conclusion of goal (EConstr) and turns it into Constr*)
+    let constr = Proofview.Goal.concl gl |> EConstr.to_constr evars in 
     tac env evars constr
   );;
 
-let get_goal_string (name : string) (env : Environ.env) (evars : Evd.evar_map) (constr : Constr.t) : unit Proofview.tactic =
-  let _ = Pp.string_of_ppcmds (Printer.pr_constr_env env evars constr) |> write_to_smt2 "hello" in
+let write_goal (filename : string) (env : Environ.env) (evars : Evd.evar_map) (constr : Constr.t) : unit Proofview.tactic =
+  (*Constr -> Pp.t -> string*)
+  let _ = constr |> Printer.pr_constr_env env evars |> Pp.string_of_ppcmds |> write_to_smt2 filename in
      Proofview.tclUNIT ();;
 
-let print_goal nme = get_goal_string nme |> mk_tactic
+let print_goal filename = write_goal filename |> mk_tactic
 
 let () = 
   define "print_goal" (string @-> tac unit) @@ print_goal;;
