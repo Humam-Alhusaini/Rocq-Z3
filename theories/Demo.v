@@ -1,17 +1,26 @@
 From Ltac2 Require Import Ltac2.
 From Rocq_Z3 Require Import Loader.
 
-Ltac2 Eval smt "hello".
-
 Goal 1 + 1 = 2.
 Proof.
-  Ltac2 Eval print_goal ().
-  smt "z3".
+  print_goal "goal".
 Admitted.
 
 Require Import Nat.
 
-Theorem what : exists x, x = 1.
+Theorem exist : exists x, x = 1 /\  x = 1.
 Proof.
-  Ltac2 Eval print_goal ().
+  print_goal "exists".
+Admitted.
+
+
+Theorem forall_nintro : forall x, x = 1.
+Proof.
+print_goal "nintro".
+Admitted.
+
+Theorem forall_intro : forall x, x = 1.
+Proof.
+  intro x.
+print_goal "intro".
 Admitted.

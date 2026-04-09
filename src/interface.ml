@@ -26,21 +26,26 @@ let define s = define (pname s)
    We define an alias for convenience. *)
 let return = Proofview.tclUNIT
 
-let smt : (string -> unit) = fun name ->
+
+let write_to_smt2 name txt =
   let chan = name ^ ".smt2" |> open_out in 
-    let _ = Printf.fprintf chan "67" in
+    let _ = Printf.fprintf chan "%s\n" txt in
       flush chan;; 
 
-let get_goal_string () : string Proofview.tactic =
-  Proofview.Goal.enter_one (fun gl ->
-    let my_econstr = Proofview.Goal.concl gl in
+let mk_tactic (tac : (Environ.env -> Evd.evar_map -> Constr.t -> unit Proofview.tactic)) : unit Proofview.tactic =
+  Proofview.Goal.enter (fun gl ->
     let env = Proofview.Goal.env gl in
-    let sigma = Tacmach.project gl in
-    let s = Pp.string_of_ppcmds (Printer.pr_econstr_env env sigma my_econstr) in
-    return s
+    let evars = Proofview.Goal.sigma gl in
+    let constr = Proofview.Goal.concl gl |> EConstr.to_constr evars in (*to_constr checks for any mis mapping between evars and econstr*)
+    tac env evars constr
   );;
 
+let get_goal_string (name : string) (env : Environ.env) (evars : Evd.evar_map) (constr : Constr.t) : unit Proofview.tactic =
+  let _ = Pp.string_of_ppcmds (Printer.pr_constr_env env evars constr) |> write_to_smt2 "hello" in
+     Proofview.tclUNIT ();;
+
+let print_goal nme = get_goal_string nme |> mk_tactic
+
 let () = 
-  define "smt" (string @-> ret unit) @@ smt;
-  define "print_goal" (unit @-> tac string) @@ get_goal_string;;
+  define "print_goal" (string @-> tac unit) @@ print_goal;;
 
