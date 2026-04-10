@@ -60,7 +60,7 @@ let write_goal (filename : string) (env : Environ.env) (evars : Evd.evar_map) (c
   let typ_str = constr |> Printer.pr_type_env env evars |> Pp.string_of_ppcmds in 
   (*Formats the env*)
   let env_str = Printer.pr_context_unlimited env evars |> Pp.string_of_ppcmds in
-    let _ = format_goal typ_str constr_str env_str |> write_to_smt2 filename in
+    let _ = format_goal typ_str constr_str env_str |> Pp.str |> Feedback.msg_notice in
       Proofview.tclUNIT ();;
 
 let print_goal filename = write_goal filename |> mk_tactic
