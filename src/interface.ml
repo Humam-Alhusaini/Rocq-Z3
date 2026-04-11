@@ -2,7 +2,7 @@ open Ltac2_plugin  (* the Ltac2 plugin is "packaged" ie its modules are all cont
    without this open we would have to refer to eg Ltac2_plugin.Tac2externals below *)
 open Tac2externals  (* APIs to register new externals, including the convenience "@->" infix operator *)
 open Tac2ffi  (* Translation operators between Ltac2 values and OCaml values in various types *)
-open Constr
+open Names
 
 open Z3
 
@@ -37,7 +37,7 @@ let write_to_smt2 filename txt =
 
 (*Boiler plate for making a tactic*)
 let mk_tactic (tac : (Environ.env -> Evd.evar_map -> Constr.t -> unit Proofview.tactic)) : unit Proofview.tactic =
-  (*Applies the goal-dependent tactic t in each goal independently*)
+(*Applies the goal-dependent tactic t in each goal independently*)
   Proofview.Goal.enter (fun gl ->
     (*Gets hypothesis*)
     let _ = Proofview.Goal.hyps gl in
@@ -53,6 +53,7 @@ let mk_tactic (tac : (Environ.env -> Evd.evar_map -> Constr.t -> unit Proofview.
 
 let format_goal (typ_str : string) (constr_str : string) (env_str : string) : Pp.t =
   Printf.sprintf "Type:\n\n %s\n\nConstr:\n\n %s\n\nEnv: %s\n" typ_str constr_str env_str |> Pp.str;;
+
 
 let write_goal (env : Environ.env) (evars : Evd.evar_map) (constr : Constr.t) : unit Proofview.tactic =
   (*Constr -> Pp.t -> string*)
@@ -86,29 +87,52 @@ let z3_discharge () : unit =
   | Z3.Solver.UNKNOWN ->
     Feedback.msg_notice (Pp.str "Z3: unknown");;
 
-  (*
-  | Construct (((sp,i),j),u) ->
-      str"Constr(" ++ pr_puniverses (MutInd.print sp ++ str"," ++ int i ++ str"," ++ int j) u ++ str")"
-      *)
+(* Corelib.Init.Datatypes.nat *)
+let nat_path : DirPath.t = DirPath.make (List.map Id.of_string ["nat"; "Datatypes"; "Init"; "Corelib"])
+let nat_modpath : ModPath.t = MPfile nat_path
 
-let constr_nat (constr : Constr.t) : int = 
-  (*2 if s, 1 if O*)
+(* Corelib.Init.Logic.eq *)
+let eq_path : DirPath.t = DirPath.make (List.map Id.of_string ["eq"; "Logic"; "Init"; "Corelib"])
+let eq_modpath : ModPath.t = MPfile eq_path
+
+(* Stdlib.NArith.BinNat.N.shiftr *)
+let binnat_path : DirPath.t = DirPath.make (List.map Id.of_string ["N"; "BinNat"; "NArith"; "Stdlib"])
+let binnat_modpath : ModPath.t = MPfile binnat_path
+
+(* Stdlib.NArith.BinNatDef.N.shiftr *)
+let binnatdef_path : DirPath.t = DirPath.make (List.map Id.of_string ["N"; "BinNatDef"; "NArith"; "Stdlib"])
+let binnatdef_modpath : ModPath.t = MPfile binnatdef_path
+
+(* Corelib.Numbers.BinNums.N *)
+let binnums_path : DirPath.t = DirPath.make (List.map Id.of_string ["N"; "BinNums"; "Numbers"; "Corelib"])
+let binnums_modpath : ModPath.t = MPfile binnums_path
+
+let num_to_SO (n : int) : int = 
+  match n with
+  | 1 -> 0
+  | 2 -> 1
+  | _ -> Constr.DestKO |> raise;;
+
+let construct_to_SO ((ind, num) : Names.constructor) =
+  match Ind.modpath ind |> ModPath.equal nat_modpath with
+  | false -> Constr.DestKO |> raise
+  | true -> num_to_SO num;;
+
+let constr_to_SO (constr : Constr.t) : int = 
   match Constr.kind constr with
-  | Construct ((_, 2), _) -> 1
-  | Construct ((_, 1), _) -> 0
-  | _ -> DestKO |> raise;;
+  | Construct (constructor, _) -> construct_to_SO constructor
+  | _ -> Constr.DestKO |> raise;;
 
-let rec lsconstr_to_nat (lsconstr : Constr.t list) (nat : int) : int = 
-  match lsconstr with
-  | hd :: ls -> lsconstr_to_nat ls (constr_nat hd + nat)
+let rec lconstr_to_nat (lconstr : Constr.t list) (nat : int) : int = 
+  match lconstr with
+  | hd :: ls -> lconstr_to_nat ls (constr_to_SO hd + nat)
   | [] -> 0;;
 
 let constr_to_nat (constr : Constr.t) (i : int) : int = 
   match Constr.kind constr with
-  | App (constr', constrs) -> lsconstr_to_nat (Array.to_list constrs) (constr_nat constr')
+  | App (constr', constrs) -> lconstr_to_nat (Array.to_list constrs) (constr_to_SO constr')
   | Construct ((_, 1), _) -> 0
-  | _ -> DestKO |> raise;;
-
+  | _ -> Constr.DestKO |> raise;;
 
 let () = 
   let _ = define "print_goal" (unit @-> tac unit) @@ print_goal in  
