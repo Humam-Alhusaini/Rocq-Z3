@@ -2,7 +2,7 @@ package "rocq_z3" (
     directory = "."
     version = "dev"
     description = "A Z3 plugin"
-    requires = "rocq-runtime.plugins.ltac2"
+    requires = "rocq-runtime.plugins.ltac2 z3"
     archive(byte) = "rocq_z3.cma"
     archive(native) = "rocq_z3.cmxa"
     plugin(byte) = "rocq_z3.cma"

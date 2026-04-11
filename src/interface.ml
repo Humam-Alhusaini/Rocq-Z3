@@ -2,6 +2,9 @@ open Ltac2_plugin  (* the Ltac2 plugin is "packaged" ie its modules are all cont
    without this open we would have to refer to eg Ltac2_plugin.Tac2externals below *)
 open Tac2externals  (* APIs to register new externals, including the convenience "@->" infix operator *)
 open Tac2ffi  (* Translation operators between Ltac2 values and OCaml values in various types *)
+open Constr
+
+(*open Z3*)
 
 (* Used to distinguish our primitives from some other plugin's primitives.
    By convention matches the plugin's ocamlfind name. *)
@@ -44,11 +47,12 @@ let mk_tactic (tac : (Environ.env -> Evd.evar_map -> Constr.t -> unit Proofview.
     let evars = Proofview.Goal.sigma gl in
     (*Gets conclusion of goal (EConstr) and turns it into Constr*)
     let constr = Proofview.Goal.concl gl |> EConstr.to_constr evars in 
+    (*Put all of these into a tactic tac*)
     tac env evars constr
   );;
 
-let format_goal (typ_str : string) (constr_str : string) (env_str : string) =
-  Printf.sprintf "Type:\n\n %s\n\nConstr:\n\n %s\n\nEnv: %s\n" typ_str constr_str env_str;;
+let format_goal (typ_str : string) (constr_str : string) (env_str : string) : Pp.t =
+  Printf.sprintf "Type:\n\n %s\n\nConstr:\n\n %s\n\nEnv: %s\n" typ_str constr_str env_str |> Pp.str;;
 
 let write_goal (env : Environ.env) (evars : Evd.evar_map) (constr : Constr.t) : unit Proofview.tactic =
   (*Constr -> Pp.t -> string*)
@@ -58,7 +62,9 @@ let write_goal (env : Environ.env) (evars : Evd.evar_map) (constr : Constr.t) : 
   (*Formats the env*)
   let env_str = Printer.pr_context_unlimited env evars |> Pp.string_of_ppcmds in
   (*Format the 3 strings nicely, and then turn it into a format that can be sent to the log window using Feedback.msg_notic*)
-    let _ = format_goal typ_str constr_str env_str |> Pp.str |> Feedback.msg_notice in
+    let _  = debug_print constr |> Feedback.msg_notice in
+    let _ = format_goal typ_str constr_str env_str |> Feedback.msg_notice in 
+    let _ = Evd.is_empty evars |> string_of_bool |> Pp.str |> Feedback.msg_notice in
       return ();;
 
 let print_goal () = write_goal |> mk_tactic;;

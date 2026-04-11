@@ -1,6 +1,7 @@
 src/META.rocq_z3
 -R theories Rocq_Z3
 -I src
+-I /home/humam/.opam/rocq/lib/z3
 
 theories/Loader.v
 theories/Demo.v
