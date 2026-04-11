@@ -1,6 +1,11 @@
 From Ltac2 Require Import Ltac2.
 From Rocq_Z3 Require Import Loader.
 
+Goal forall x y, y = 1 -> x = y -> x = 1.
+Proof.
+  intros. print_goal.
+Admitted.
+
 Goal 1 + 1 = 2.
 Proof.
   print_goal.

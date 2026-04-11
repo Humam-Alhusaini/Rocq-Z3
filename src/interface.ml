@@ -64,7 +64,6 @@ let write_goal (env : Environ.env) (evars : Evd.evar_map) (constr : Constr.t) : 
   (*Format the 3 strings nicely, and then turn it into a format that can be sent to the log window using Feedback.msg_notic*)
     let _  = debug_print constr |> Feedback.msg_notice in
     let _ = format_goal typ_str constr_str env_str |> Feedback.msg_notice in 
-    let _ = Evd.is_empty evars |> string_of_bool |> Pp.str |> Feedback.msg_notice in
       return ();;
 
 let print_goal () = write_goal |> mk_tactic;;
