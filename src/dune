@@ -1,4 +1,4 @@
 (library
  (name rocq-z3)
- (libraries rocq-runtime.plugins.ltac2 rocq-runtime.engine rocq-runtime.dev z3)
+ (libraries rocq-runtime.plugins.ltac2 rocq-runtime.engine rocq-runtime.kernel z3)
  )

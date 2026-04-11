@@ -4,7 +4,7 @@ open Tac2externals  (* APIs to register new externals, including the convenience
 open Tac2ffi  (* Translation operators between Ltac2 values and OCaml values in various types *)
 open Constr
 
-(*open Z3*)
+open Z3
 
 (* Used to distinguish our primitives from some other plugin's primitives.
    By convention matches the plugin's ocamlfind name. *)
@@ -62,12 +62,55 @@ let write_goal (env : Environ.env) (evars : Evd.evar_map) (constr : Constr.t) : 
   (*Formats the env*)
   let env_str = Printer.pr_context_unlimited env evars |> Pp.string_of_ppcmds in
   (*Format the 3 strings nicely, and then turn it into a format that can be sent to the log window using Feedback.msg_notic*)
-    let _  = debug_print constr |> Feedback.msg_notice in
+    let _  = Constr.debug_print constr |> Feedback.msg_notice in
     let _ = format_goal typ_str constr_str env_str |> Feedback.msg_notice in 
       return ();;
 
+let ctx = mk_context [];;
+
 let print_goal () = write_goal |> mk_tactic;;
 
+let z3_discharge () : unit =
+  let ctx = Z3.mk_context [] in
+  let _ = Z3.Arithmetic.Integer.mk_sort ctx in
+  let zero = Z3.Arithmetic.Integer.mk_numeral_i ctx 0 in
+  let goal = Z3.Boolean.mk_eq ctx zero zero in
+  (* we want to prove goal, so we assert its negation and check unsat *)
+  let solver = Z3.Solver.mk_solver ctx None in
+  Z3.Solver.add solver [Z3.Boolean.mk_not ctx goal];
+  match Z3.Solver.check solver [] with
+  | Z3.Solver.UNSATISFIABLE ->
+    Feedback.msg_notice (Pp.str "Z3: goal discharged successfully")
+  | Z3.Solver.SATISFIABLE ->
+    Feedback.msg_notice (Pp.str "Z3: goal is false")
+  | Z3.Solver.UNKNOWN ->
+    Feedback.msg_notice (Pp.str "Z3: unknown");;
+
+  (*
+  | Construct (((sp,i),j),u) ->
+      str"Constr(" ++ pr_puniverses (MutInd.print sp ++ str"," ++ int i ++ str"," ++ int j) u ++ str")"
+      *)
+
+let constr_nat (constr : Constr.t) : int = 
+  (*2 if s, 1 if O*)
+  match Constr.kind constr with
+  | Construct ((_, 2), _) -> 1
+  | Construct ((_, 1), _) -> 0
+  | _ -> DestKO |> raise;;
+
+let rec lsconstr_to_nat (lsconstr : Constr.t list) (nat : int) : int = 
+  match lsconstr with
+  | hd :: ls -> lsconstr_to_nat ls (constr_nat hd + nat)
+  | [] -> 0;;
+
+let constr_to_nat (constr : Constr.t) (i : int) : int = 
+  match Constr.kind constr with
+  | App (constr', constrs) -> lsconstr_to_nat (Array.to_list constrs) (constr_nat constr')
+  | Construct ((_, 1), _) -> 0
+  | _ -> DestKO |> raise;;
+
+
 let () = 
-  define "print_goal" (unit @-> tac unit) @@ print_goal;;
+  let _ = define "print_goal" (unit @-> tac unit) @@ print_goal in  
+  define "discharge" (unit @-> ret unit) @@ z3_discharge;;
 

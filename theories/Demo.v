@@ -6,12 +6,25 @@ Proof.
   intros. print_goal.
 Admitted.
 
+Goal 1 = 0.
+Proof.
+  print_goal.
+Admitted.
+
+Require Import NArith.
+Open Scope N.
+
+Goal N.shiftr 1 1 = 0.
+Proof.
+discharge. print_goal.
+Admitted.
+
 Goal 1 + 1 = 2.
 Proof.
   print_goal.
 Admitted.
 
-Require Import Nat.
+Close Scope N.
 
 Theorem exist : exists x, x = 1.
 Proof.
