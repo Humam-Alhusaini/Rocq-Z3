@@ -6,5 +6,8 @@ src/META.rocq_z3
 theories/Loader.v
 theories/Demo.v
 
+src/nat.ml
+src/paths.ml
+src/tactics.ml
 src/interface.ml
 src/rocq_z3.mlpack
