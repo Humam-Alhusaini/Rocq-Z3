@@ -19,3 +19,11 @@ let binnums_modpath   = make_modpath (corelib_numbers @ ["BinNums"; "N"])
 
 let natid = Id.of_string "nat";;
 let eqid = Id.of_string "eq";;
+
+let ind_id ((mutind, _) : Ind.t) : Id.t = 
+  MutInd.label mutind;;
+ 
+let path_error (ind : Ind.t) (id : Id.t) = 
+  let modpathstr = Ind.modpath ind |> ModPath.to_string in
+  let idstr = ind_id ind |> Id.to_string in
+  Printf.sprintf "Not an %s ind, modpath was %s and id was %s" (Id.to_string id)  modpathstr idstr |> failwith;;
