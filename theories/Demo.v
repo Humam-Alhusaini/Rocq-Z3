@@ -1,14 +1,24 @@
 From Ltac2 Require Import Ltac2.
 From Rocq_Z3 Require Import Loader.
 
-Goal forall x y, y = 1 -> x = y -> x = 1.
+Goal 0 = 0.
 Proof.
-  intros. print_goal.
+  print_goal. discharge.
+Admitted.
+
+Goal 0 = 1.
+Proof.
+  print_goal. discharge.
 Admitted.
 
 Goal 1 = 0.
 Proof.
-  print_goal.
+  print_goal. discharge.
+Admitted.
+
+Goal 3 = 1.
+Proof.
+  print_goal. discharge.
 Admitted.
 
 Require Import NArith.
@@ -25,6 +35,11 @@ Proof.
 Admitted.
 
 Close Scope N.
+
+Theorem Forall : forall (x : nat), x = x.
+Proof.
+  intros. print_goal_body ().
+Admitted.
 
 Theorem exist : exists x, x = 1.
 Proof.

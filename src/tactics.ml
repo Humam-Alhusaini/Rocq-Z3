@@ -1,3 +1,9 @@
+open Z3
+
+open Nat
+
+open Printf
+
 (* Rocq tactics are values of the [Proofview.tactic] monad.
   tclUnit in Proofview is the return operation of this monad.
    We define an alias for convenience. *)
@@ -37,19 +43,19 @@ let write_goal (env : Environ.env) (evars : Evd.evar_map) (constr : Constr.t) : 
 
 let print_goal () = write_goal |> mk_tactic;;
 
-let z3_discharge () : unit =
-  let ctx = Z3.mk_context [] in
-  let _ = Z3.Arithmetic.Integer.mk_sort ctx in
-  let zero = Z3.Arithmetic.Integer.mk_numeral_i ctx 0 in
-  let goal = Z3.Boolean.mk_eq ctx zero zero in
+let z3_discharge (env : Environ.env) (evars : Evd.evar_map) (constr : Constr.t) : unit Proofview.tactic =
+  let ctx = mk_context [] in
+  let goal : Expr.expr = parse_entire constr ctx in
+  let goal_str = Expr.to_string goal |> sprintf "Goal: %s" in
   (* we want to prove goal, so we assert its negation and check unsat *)
-  let solver = Z3.Solver.mk_solver ctx None in
-  Z3.Solver.add solver [Z3.Boolean.mk_not ctx goal];
-  match Z3.Solver.check solver [] with
-  | Z3.Solver.UNSATISFIABLE ->
-    Feedback.msg_notice (Pp.str "Z3: goal discharged successfully")
-  | Z3.Solver.SATISFIABLE ->
-    Feedback.msg_notice (Pp.str "Z3: goal is false")
-  | Z3.Solver.UNKNOWN ->
-    Feedback.msg_notice (Pp.str "Z3: unknown");;
+  let solver = Solver.mk_solver ctx None in
+  Solver.add solver [Boolean.mk_not ctx goal];
+  let _ = match Solver.check solver [] with
+  | Solver.UNSATISFIABLE ->
+    goal_str |> sprintf "Z3: goal discharged successfully\n%s" |> Pp.str |> Feedback.msg_notice 
+  | Solver.SATISFIABLE ->
+    goal_str |> sprintf "Z3: goal is false\n%s" |> Pp.str |> Feedback.msg_notice
+  | Solver.UNKNOWN ->
+    goal_str |> sprintf "Z3: unknown\n%s" |> Pp.str |> Feedback.msg_notice in return ();;
 
+let call_z3 () = z3_discharge |> mk_tactic;;
