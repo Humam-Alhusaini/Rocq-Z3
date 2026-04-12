@@ -6,11 +6,6 @@ Proof.
   print_goal. discharge.
 Admitted.
 
-Goal 0 = 1.
-Proof.
-  print_goal. discharge.
-Admitted.
-
 Goal 1 = 0.
 Proof.
   print_goal. discharge.
@@ -20,9 +15,6 @@ Goal 100 = 100.
 Proof.
   print_goal. discharge.
 Admitted.
-
-Require Import NArith.
-Open Scope N.
 
 Goal N.shiftr 1 1 = 0.
 Proof.
