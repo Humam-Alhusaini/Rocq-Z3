@@ -16,7 +16,7 @@ Proof.
   print_goal. discharge.
 Admitted.
 
-Goal 3 = 1.
+Goal 100 = 100.
 Proof.
   print_goal. discharge.
 Admitted.

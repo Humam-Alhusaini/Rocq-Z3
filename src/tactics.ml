@@ -54,8 +54,8 @@ let z3_discharge (env : Environ.env) (evars : Evd.evar_map) (constr : Constr.t) 
   | Solver.UNSATISFIABLE ->
     goal_str |> sprintf "Z3: goal discharged successfully\n%s" |> Pp.str |> Feedback.msg_notice 
   | Solver.SATISFIABLE ->
-    goal_str |> sprintf "Z3: goal is false\n%s" |> Pp.str |> Feedback.msg_notice
+    goal_str |> sprintf "Z3: goal is false\n%s" |> failwith
   | Solver.UNKNOWN ->
-    goal_str |> sprintf "Z3: unknown\n%s" |> Pp.str |> Feedback.msg_notice in return ();;
+    goal_str |> sprintf "Z3: unknown\n%s" |> failwith in return ();;
 
 let call_z3 () = z3_discharge |> mk_tactic;;
