@@ -8,9 +8,6 @@ let app_to_list (constr : Constr.t) : Constr.t list =
   | App (constr', constrs) -> constr' :: (Array.to_list constrs)
   | _ -> "app_to_list: not an App" |> failwith;;
 
-let eq_path (ind : Ind.t) (path : ModPath.t) (id : Id.t) : bool =
-  (Ind.modpath ind |> ModPath.equal path && ind_id ind |> Id.equal id)
-
 let rec lconstr_to_nat (lconstr : Constr.t list) (nat : int) : int = 
   match lconstr with
   | [] -> "oh so empty" |> failwith
@@ -23,7 +20,7 @@ and constr_to_nat (constr : Constr.t) (nat : int) : int =
   | _ -> "constr_to_nat: not an App or Construct" |> failwith;;
 
 let ind_to_typ (ind : inductive) =
-  match eq_path ind nat_modpath natid with
+  match eq_path ind datatype_path natid with
   | true -> ()
   | false -> path_error ind natid |> failwith;;
 
@@ -33,7 +30,7 @@ let check_typ (constr : Constr.t) : unit =
   | _ -> failwith "constr_to_typ: not an Ind";;
 
 let ind_to_eq (ind : inductive) =
-  match eq_path ind eq_modpath eqid with
+  match eq_path ind logic_path eqid with
   | true -> Boolean.mk_eq
   | false -> path_error ind eqid |> failwith;;
 
