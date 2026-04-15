@@ -24,5 +24,5 @@ let define s = define (pname s);;
 
 (*Export the tactics here*)
 let () = 
-  let _ = define "print_goal" (unit @-> tac unit) @@ print_goal in  
+  let _ = define "print_lemma" (unit @-> tac unit) @@ print_lemma in
   define "call_z3" (unit @-> tac unit) @@ call_z3;;

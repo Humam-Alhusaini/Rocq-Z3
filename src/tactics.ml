@@ -25,24 +25,6 @@ let mk_tactic (tac : (Environ.env -> Evd.evar_map -> Constr.t -> unit Proofview.
     tac env evars constr
   );;
 
-let format_goal (typ_str : string) (constr_str : string) (env_str : string) : Pp.t =
-  Printf.sprintf "Type:\n\n %s\n\nConstr:\n\n %s\n\nEnv: %s\n" typ_str constr_str env_str |> Pp.str;;
-
-
-let write_goal (env : Environ.env) (evars : Evd.evar_map) (constr : Constr.t) : unit Proofview.tactic =
-  (*Constr -> Pp.t -> string*)
-  let constr_str = constr |> Printer.pr_constr_env env evars |> Pp.string_of_ppcmds in
-  (*Constr = Typs in constr module, which implies that this is the same or atleast similar*)
-  let typ_str = constr |> Printer.pr_type_env env evars |> Pp.string_of_ppcmds in 
-  (*Formats the env*)
-  let env_str = Printer.pr_context_unlimited env evars |> Pp.string_of_ppcmds in
-  (*Format the 3 strings nicely, and then turn it into a format that can be sent to the log window using Feedback.msg_notic*)
-    let _  = Constr.debug_print constr |> Feedback.msg_notice in
-    let _ = format_goal typ_str constr_str env_str |> Feedback.msg_notice in 
-      return ();;
-
-let print_goal () = write_goal |> mk_tactic;;
-
 let z3_discharge (env : Environ.env) (evars : Evd.evar_map) (constr : Constr.t) : unit Proofview.tactic =
   let ctx = mk_context [] in
   let goal : Expr.expr = parse_entire constr ctx in
@@ -59,3 +41,21 @@ let z3_discharge (env : Environ.env) (evars : Evd.evar_map) (constr : Constr.t) 
     goal_str |> sprintf "Z3: unknown\n%s" |> failwith in return ();;
 
 let call_z3 () = z3_discharge |> mk_tactic;;
+
+(*let constrextern_extern_constr env evars c =
+  Constrextern.extern_constr env evars c;;
+
+let print_expr (env : Environ.env) (evars : Evd.evar_map) (econstr : EConstr.t) : unit Proofview.tactic =
+  let constrexpr = constrextern_extern_constr env evars econstr in
+  let pp = Ppconstr.pr_constr_expr env evars constrexpr in
+  Feedback.msg_notice pp;
+  Proofview.tclUNIT ();;
+*)
+
+let of_coq_lemma (env : Environ.env) (sigma : Evd.evar_map) (clemma : Constr.t) : unit Proofview.tactic =
+  let (rel_context, qf_lemma) : (Constr.rel_context * Constr.types) = Term.decompose_prod_decls clemma in
+  let _ : Environ.env = Environ.push_rel_context rel_context env in
+  Feedback.msg_notice (Constr.debug_print qf_lemma);
+  Feedback.msg_notice (Constr.debug_print clemma); return ();;
+
+let print_lemma () = of_coq_lemma |> mk_tactic;;
