@@ -8,7 +8,7 @@ Admitted.
 
 Theorem Forall : forall (x : nat), x = x.
 Proof.
-  print_lemma. print_lemma.
+  print_lemma. 
 Admitted.
 
 Theorem exist : exists x, x = 1.

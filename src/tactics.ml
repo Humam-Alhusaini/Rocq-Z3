@@ -1,9 +1,3 @@
-open Z3
-
-open Nat
-
-open Printf
-
 (* Rocq tactics are values of the [Proofview.tactic] monad.
   tclUnit in Proofview is the return operation of this monad.
    We define an alias for convenience. *)
@@ -25,6 +19,22 @@ let mk_tactic (tac : (Environ.env -> Evd.evar_map -> Constr.t -> unit Proofview.
     tac env evars constr
   );;
 
+let of_coq_lemma (env : Environ.env) (evars : Evd.evar_map) (clemma : Constr.t) : unit Proofview.tactic =
+  (*Separates the quantifiers from lemma*)
+  let (rel_context, qf_lemma) : (Constr.rel_context * Constr.types) = Term.decompose_prod_decls clemma in
+  (*Adds the proper quantifiers to the env instead of having empty references*)
+  let env_rel : Environ.env = Environ.push_rel_context rel_context env in
+  let _, _ = Constr.decompose_app_list qf_lemma in
+  (*let form = coq_to_form _ in
+  let print = print_form in*)
+  Feedback.msg_notice (Printer.pr_context_unlimited env_rel evars);
+  Feedback.msg_notice (Constr.debug_print qf_lemma); return ();;
+
+let print_lemma () = of_coq_lemma |> mk_tactic;;
+
+
+(*
+
 let z3_discharge (env : Environ.env) (evars : Evd.evar_map) (constr : Constr.t) : unit Proofview.tactic =
   let ctx = mk_context [] in
   let goal : Expr.expr = parse_entire constr ctx in
@@ -42,20 +52,22 @@ let z3_discharge (env : Environ.env) (evars : Evd.evar_map) (constr : Constr.t) 
 
 let call_z3 () = z3_discharge |> mk_tactic;;
 
-(*let constrextern_extern_constr env evars c =
-  Constrextern.extern_constr env evars c;;
+*)
+(*
 
-let print_expr (env : Environ.env) (evars : Evd.evar_map) (econstr : EConstr.t) : unit Proofview.tactic =
-  let constrexpr = constrextern_extern_constr env evars econstr in
-  let pp = Ppconstr.pr_constr_expr env evars constrexpr in
-  Feedback.msg_notice pp;
-  Proofview.tclUNIT ();;
+let warn () = Feedback.msg_notice (Pp.str "hello"); None;;
+
+let core_f =
+if Constr.equal f cis_true then
+    match args with
+    | [a] -> Some a
+    | _ -> warn ()
+  else if Constr.equal f (Lazy.force ceq) then
+    match args with
+    | [ty; arg1; arg2] when Constr.equal ty (Lazy.force cbool) &&
+                              Constr.equal arg2 (Lazy.force ctrue) ->
+      Some arg1
+    | _ -> warn ()
+  else warn ();;
 *)
 
-let of_coq_lemma (env : Environ.env) (sigma : Evd.evar_map) (clemma : Constr.t) : unit Proofview.tactic =
-  let (rel_context, qf_lemma) : (Constr.rel_context * Constr.types) = Term.decompose_prod_decls clemma in
-  let _ : Environ.env = Environ.push_rel_context rel_context env in
-  Feedback.msg_notice (Constr.debug_print qf_lemma);
-  Feedback.msg_notice (Constr.debug_print clemma); return ();;
-
-let print_lemma () = of_coq_lemma |> mk_tactic;;
