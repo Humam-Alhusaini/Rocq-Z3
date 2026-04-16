@@ -6,7 +6,7 @@ src/META.rocq_z3
 theories/Loader.v
 theories/Demo.v
 
-src/map.ml
+src/term_map.ml
 src/paths.ml
 src/tactics.ml
 src/interface.ml

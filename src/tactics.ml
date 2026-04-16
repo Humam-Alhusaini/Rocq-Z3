@@ -32,7 +32,6 @@ let of_coq_lemma (env : Environ.env) (evars : Evd.evar_map) (clemma : Constr.t) 
 
 let print_lemma () = of_coq_lemma |> mk_tactic;;
 
-
 (*
 
 let z3_discharge (env : Environ.env) (evars : Evd.evar_map) (constr : Constr.t) : unit Proofview.tactic =
