@@ -1,8 +1,10 @@
 type coqTerm = Constr.t lazy_t
 
+(** Functions over constr *)
+let mklApp f args = Constr.mkApp (Lazy.force f, args)
+
 let gc (prefix : string) (constant : string) : Constr.t lazy_t =
   lazy (UnivGen.constr_of_monomorphic_global (Global.env ()) (Rocqlib.lib_ref (prefix ^ "." ^ constant)));;
-
 
 (* is_true *)
 let cis_true = gc "core.is_true" "is_true"
@@ -58,3 +60,65 @@ let eq_gc = gc eq_prefix
 let ceq = eq_gc "type"
 let crefl_equal = eq_gc "refl"
 
+(* Compute a nat *)
+let rec mkNat = function
+  | 0 -> Lazy.force cO
+  | i -> mklApp cS [|mkNat (i-1)|]
+
+(* Compute a positive *)
+let rec mkPositive = function
+  | 1 -> Lazy.force cxH
+  | i ->
+     let c = if (i mod 2) = 0 then cxO else cxI in
+     mklApp c [|mkPositive (i / 2)|]
+
+(* Compute a N *)
+let mkN = function
+  | 0 -> Lazy.force cN0
+  | i -> mklApp cNpos [|mkPositive i|]
+
+(* Compute a Boolean *)
+let mkBool = function
+  | true -> Lazy.force ctrue
+  | false -> Lazy.force cfalse
+
+(* Reification *)
+let mk_bool b =
+  let c, args = Constr.decompose_app_list b in
+  if Constr.equal c (Lazy.force ctrue) then true
+  else if Constr.equal c (Lazy.force cfalse) then false
+  else assert false
+
+let rec mk_nat n =
+  let c, args = Constr.decompose_app_list n in
+  if Constr.equal c (Lazy.force cO) then
+    0
+  else if Constr.equal c (Lazy.force cS) then
+    match args with
+    | [n] -> (mk_nat n) + 1
+    | _ -> assert false
+  else assert false
+
+let rec mk_positive n =
+  let c, args = Constr.decompose_app_list n in
+  if Constr.equal c (Lazy.force cxH) then
+    1
+  else if Constr.equal c (Lazy.force cxO) then
+    match args with
+    | [n] -> 2 * (mk_positive n)
+    | _ -> assert false
+  else if Constr.equal c (Lazy.force cxI) then
+    match args with
+    | [n] -> 2 * (mk_positive n) + 1
+    | _ -> assert false
+  else assert false
+
+let mk_N n =
+  let c, args = Constr.decompose_app_list n in
+  if Constr.equal c (Lazy.force cN0) then
+    0
+  else if Constr.equal c (Lazy.force cNpos) then
+    match args with
+    | [n] -> mk_positive n
+    | _ -> assert false
+  else assert false
