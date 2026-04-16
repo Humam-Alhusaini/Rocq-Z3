@@ -1,3 +1,5 @@
+open Paths
+
 (* Rocq tactics are values of the [Proofview.tactic] monad.
   tclUnit in Proofview is the return operation of this monad.
    We define an alias for convenience. *)
@@ -19,12 +21,23 @@ let mk_tactic (tac : (Environ.env -> Evd.evar_map -> Constr.t -> unit Proofview.
     tac env evars constr
   );;
 
+  
+let core_f (constr : Constr.t) (args : Constr.t list) : Constr.t option = 
+  if Constr.equal constr (Lazy.force ceq) then
+    match args with
+    | [ty; arg1; arg2] 
+        when Constr.equal ty (Lazy.force cbool) && Constr.equal arg2 (Lazy.force ctrue) -> Some arg1
+    | _ -> failwith ("Constr not bool or not well types")
+  else failwith "Should have an eq";;
+
+  
 let of_coq_lemma (env : Environ.env) (evars : Evd.evar_map) (clemma : Constr.t) : unit Proofview.tactic =
   (*Separates the quantifiers from lemma*)
   let (rel_context, qf_lemma) : (Constr.rel_context * Constr.types) = Term.decompose_prod_decls clemma in
   (*Adds the proper quantifiers to the env instead of having empty references*)
   let env_rel : Environ.env = Environ.push_rel_context rel_context env in
-  let _, _ = Constr.decompose_app_list qf_lemma in
+  let f, args = Constr.decompose_app_list qf_lemma in
+  let _ = core_f f args in
   (*let form = coq_to_form _ in
   let print = print_form in*)
   Feedback.msg_notice (Printer.pr_context_unlimited env_rel evars);

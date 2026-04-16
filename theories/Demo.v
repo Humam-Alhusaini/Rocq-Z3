@@ -1,7 +1,12 @@
 From Ltac2 Require Import Ltac2.
 From Rocq_Z3 Require Import Loader.
 
-Goal 0 = 0.
+Require Import Bool.
+Require Import Nat.
+
+Open Scope nat_scope.
+
+Goal (0 =? 0)%bool = true.
 Proof.
   print_lemma.
 Admitted.
